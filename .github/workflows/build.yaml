@@ -51,8 +51,6 @@ jobs:
   merge:
     runs-on: ubuntu-20.04
     needs: [ build ]
-    env: 
-      IMAGE: ${{ env.IMAGE_TAG }}
     steps: 
       - uses: actions/checkout@v4
       - uses: docker/login-action@v3
@@ -62,4 +60,4 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - run: |
           docker buildx imagetools create \
-            --tag ${IMAGE}:latest ${IMAGE}:{amd64,i386,arm{32v{6,7},64v8}}
+            --tag ${{ env.IMAGE_TAG }}:latest ${{ env.IMAGE_TAG }}:{amd64,i386,arm{32v{6,7},64v8}}
