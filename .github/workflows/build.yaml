@@ -3,6 +3,9 @@ name: Build image(s)
 on:
   push:
 
+env:
+  IMAGE_TAG: ghcr.io/kankerdev/backend-realip-fix
+
 permissions:
   packages: write
   contents: read
@@ -31,7 +34,7 @@ jobs:
       - uses: docker/metadata-action@v5
         id: image-metadata
         with: 
-          images: ghcr.io/kankerdev/packserve
+          images: ${{ env.IMAGE_TAG }}
           tags: |
             type=raw,value=${{ matrix.arch }}
       - uses: docker/login-action@v3
@@ -49,7 +52,7 @@ jobs:
     runs-on: ubuntu-20.04
     needs: [ build ]
     env: 
-      IMAGE: ghcr.io/kankerdev/backend-realip-fix
+      IMAGE: ${{ env.IMAGE_TAG }}
     steps: 
       - uses: actions/checkout@v4
       - uses: docker/login-action@v3
