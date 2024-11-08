@@ -1,0 +1,46 @@
+user nginx;
+worker_processes auto;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include /etc/nginx/mime.types;
+    sendfile on;
+    keepalive_timeout 65;
+
+    # Don't expose NGINX version
+    server_tokens off;
+
+    # Tell the browser to view unknown mime-types as plaintext,
+    default_type text/plain;
+
+    # Don't keep logs
+    access_log /dev/null;
+    error_log /dev/null;
+
+    server {
+        listen 80;
+        server_name ${SERVER_NAME};
+
+        location / {
+            
+            # Check if CF-Connecting-IP exists and set X-Forwarded-For accordingly
+            set $real_ip $remote_addr;
+            if ($http_cf_connecting_ip) {
+               # Override if Cloudflare header is present
+                set $real_ip $http_cf_connecting_ip;                    
+            }
+
+            # Set headers for proxying
+            proxy_set_header X-Real-IP $real_ip;
+            proxy_set_header X-Forwarded-For $real_ip;
+
+            proxy_set_header Host $host;
+            proxy_set_header Connection $http_connection;
+
+            proxy_pass http://${BACKEND_HOST}:${BACKEND_PORT};
+        }
+    }
+}
